@@ -1,0 +1,15 @@
+#!/bin/bash
+
+ALERT=90
+
+df -H / | awk 'NR==2{print $5 " " $1}' | while read -r output;
+do
+  usep=$(echo "$output" | awk '{ print $1}' | cut -d'%' -f1 )
+  partition=$(echo "$output" | awk '{ print $2 }' )
+
+  if [ "$usep" -ge "$ALERT" ]; then
+    message="Running out of space \"$partition ($usep%)\" on $(hostname) as on $(date)"
+aws sns publish --region eu-west-2 --topic-arn arn:aws:sns:eu-west-2:604414212996:BBA-Db-Server-cpu-utilization-above-90 --message "BBA-DB-SERVER DISK USED ABOVE 90%"
+
+  fi
+done
